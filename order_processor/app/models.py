@@ -33,6 +33,7 @@ class Order(Base):
 
     order_items: Mapped[list["OrderItem"]] = relationship("OrderItem", back_populates='order')
     retail_order: Mapped["RetailOrder"] = relationship("RetailOrder", back_populates='order')
+    order_status: Mapped["Status"] = relationship('Status', back_populates='order')
 
 
 class OrderItem(Base):
@@ -40,5 +41,37 @@ class OrderItem(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     order_id: Mapped[int] = mapped_column(Integer, ForeignKey('orders.id'))
+    sku: Mapped[int] = mapped_column(Integer, nullable=False)
+    qty: Mapped[int] = mapped_column(Integer)
+    price: Mapped[int] = mapped_column(Float, default=0.0)
 
     order: Mapped["Order"] = relationship("Order", back_populates='order_items')
+
+
+class Status(Base):
+    __tablename__ = 'statuses'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    sysname: Mapped[str] = mapped_column(Text, nullable=False)
+
+    order: Mapped["Order"] = relationship('Order', back_populates='order_status')
+    retail_order: Mapped["RetailOrder"] = relationship('RetailOrder', back_populates='order_status')
+
+
+class RetailPartner(Base):
+    __tablename__ = 'retail_partners'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+
+    retail_order: Mapped[list["RetailOrder"]] = relationship('RetailOrder', back_populates='retail_partner_obj')
+
+
+class Marketplace(Base):
+    __tablename__ = 'marketplaces'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+
+    retail_order: Mapped[list["RetailOrder"]] = relationship('RetailOrder', back_populates='marketplace_obj')
