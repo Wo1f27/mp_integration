@@ -8,4 +8,7 @@ class StatusId:
 
 
 class MarketplaceId:
-    OZON = 'ozon'
+    OZON = 1
+    WILDBERRIES = 2
+    YANDEX_MARKET = 3
+    AVITO = 4

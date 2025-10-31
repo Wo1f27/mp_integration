@@ -1,4 +1,4 @@
-from sqlalchemy import String, Integer, Float, Text, DateTime, JSON, ForeignKey
+from sqlalchemy import String, Boolean, Integer, Float, Text, DateTime, JSON, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from .database import Base
@@ -30,10 +30,18 @@ class Order(Base):
     __tablename__ = 'orders'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    date_added: Mapped[DateTime] = mapped_column(DateTime(timezone=False), server_default=func.now())
+    status: Mapped[int] = mapped_column(Integer, ForeignKey('statuses.id'))
+    partner: Mapped[int] = mapped_column(Integer, ForeignKey('partners.id'))
+    total_sum: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    address: Mapped[str] = mapped_column(Text)
+    date_ship: Mapped[DateTime] = mapped_column(DateTime(timezone=False))
+
 
     order_items: Mapped[list["OrderItem"]] = relationship("OrderItem", back_populates='order')
     retail_order: Mapped["RetailOrder"] = relationship("RetailOrder", back_populates='order')
     order_status: Mapped["Status"] = relationship('Status', back_populates='order')
+    order_partner: Mapped["Partner"] = relationship('Partner', back_populates='orders')
 
 
 class OrderItem(Base):
@@ -75,3 +83,14 @@ class Marketplace(Base):
     name: Mapped[str] = mapped_column(Text, nullable=False)
 
     retail_order: Mapped[list["RetailOrder"]] = relationship('RetailOrder', back_populates='marketplace_obj')
+
+
+class Partner(Base):
+    __tablename__ = 'partners'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    date_create: Mapped[DateTime] = mapped_column(DateTime(timezone=False), server_default=func.now())
+
+    orders: Mapped[list["Order"]] = relationship('Order', back_populates='order_partner')
